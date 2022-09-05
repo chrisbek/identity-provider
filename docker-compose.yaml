@@ -1,0 +1,58 @@
+version: '3.7'
+
+services:
+    identity-provider:
+        build:
+            context: ./
+            dockerfile: dev.dockerfile
+            args:
+                - PROJECT_NAME
+                - MODE
+                - DIR_WITH_MAIN
+                - NAME_OF_MAIN
+                - VARIABLE_NAME
+                - WORKER_CLASS
+                - WORKERS_PER_CORE
+                - MAX_WORKERS
+                - LIVE_RELOAD
+                - GRACEFUL_TIMEOUT
+                - TIMEOUT
+                - KEEP_ALIVE
+                - HOST
+                - PORT
+                - LOG_LEVEL
+                - RELOAD
+        volumes:
+            - ./:/${PROJECT_NAME}
+        container_name: "${PROJECT_NAME}"
+        command: /bin/sh -c "/${PROJECT_NAME}/server/start.sh"
+        ports:
+            - "80:80"
+        networks:
+            main-net:
+                ipv4_address: 172.30.0.5
+        env_file:
+            - ./server/project_conf.conf
+            - ./server/prod/gunicorn_defaults.conf
+            - ./server/dev/uvicorn_defaults.conf
+        extra_hosts:
+            -   "database.host:172.30.0.4"
+
+    # database:
+    #     image: mysql:5.7
+    #     container_name: "${PROJECT_NAME}_db"
+    #     environment:
+    #         - MYSQL_ROOT_PASSWORD=root
+    #     volumes:
+    #         - /home/christophoros/Documents/Projects/docker-local/mysql:/var/lib/mysql
+    #     networks:
+    #         main-net:
+    #             ipv4_address: 172.30.0.4
+    #             aliases:
+    #                 - "${PROJECT_NAME}-db"
+    #     ports:
+    #         - "3333:3306"
+
+networks:
+    main-net:
+        external: true
